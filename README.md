@@ -92,9 +92,3 @@ Open the local URL printed by Streamlit, usually `http://localhost:8501`. It use
 ## Report storage
 
 `save_report` writes `.txt` reports into the server's `reports` directory and refuses to overwrite an existing filename. Reports are stored on the server, not downloaded to the client computer. Render's free filesystem is temporary, so reports may be lost after restarts or redeployments.
-
-## Submission
-
-Submit `BCSF24M052_Assignment3.zip` containing the assignment's `agent/`, `server/`, dependency file, and README. Include `agent/.env.example`.
-
-Exclude real `.env` files, chat databases and their companion files, `__pycache__/`, virtual environments, and generated reports. The Streamlit interface and development test are optional; the terminal agent does not require them.
