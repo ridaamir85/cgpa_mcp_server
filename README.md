@@ -1,94 +1,52 @@
-# PUCIT GPA Assistant - Assignment 3
+# PUCIT GPA Assistant · Assignment 3
 
-The GPA/CGPA assistant uses MCP tools, persistent SQLite memory, asynchronous execution, streaming, and interrupted-tool-call recovery. This GitHub repository contains the server files at its root; the full local assignment has separate `agent/` and `server/` folders.
+A Python GPA and CGPA assistant for PUCIT BS Computer Science students. The FastMCP server exposes tools for grade conversion, GPA and CGPA calculations, course lookup, credit totals, and report saving.
 
-## Deployment details
+## Hosted MCP server
 
-- Hosted MCP server: https://cgpa-mcp-server.onrender.com/mcp
-- MCP authentication: Not required; the current endpoint is public and does not check an API key.
-- Server GitHub repository: https://github.com/ridaamir85/cgpa_mcp_server
-
-The Groq API key belongs to the separate agent application. This tool server does not require it.
-
-## Available tools
-
-- `marks_to_grade_points`
-- `calculate_semester_gpa`
-- `calculate_new_cgpa`
-- `required_gpa_for_target`
-- `get_semester_courses`
-- `get_remaining_credit_hours`
-- `save_report`
-
-## Test the hosted server
+- Endpoint: https://cgpa-mcp-server.onrender.com/mcp
+- Authentication: No MCP API key required
+- Source: https://github.com/ridaamir85/cgpa_mcp_server
 
 ```powershell
 fastmcp list https://cgpa-mcp-server.onrender.com/mcp
 fastmcp call https://cgpa-mcp-server.onrender.com/mcp get_semester_courses semester=6
 ```
 
-Render's free instance may take time to wake after inactivity. The `/mcp` endpoint is intended for MCP clients; opening it directly in a browser may return a missing-session error.
+These commands test the server directly without Groq. The first request may take longer after the free Render instance has been idle.
 
-## Connect the agent
+## Run the MCP server locally
 
-Set these values in the separate agent's `.env` file:
-
-```text
-MCP_URL=https://cgpa-mcp-server.onrender.com/mcp
-FASTMCP_KEY=
-```
-
-Keep the agent's existing `GROQ_API_KEY` configured locally. Never commit its `.env` file.
-
-## Run locally
-
-The commands below run the server from this GitHub repository. In the full assignment folder, enter `server/` first.
+In the GitHub server repository, run the following from the repository root. In the assignment project, install dependencies from the project root, then enter `server/` before running `python server.py`.
 
 ```powershell
 python -m pip install -r requirements.txt
 python server.py
 ```
 
-Local MCP URL: `http://127.0.0.1:8000/mcp`. The server reads `PORT` when supplied by the hosting platform and otherwise uses port 8000.
+The local endpoint is `http://127.0.0.1:8000/mcp`. The server uses the hosting platform's `PORT` when provided and defaults to port 8000.
 
-## Run the full assignment agent
+## Run the assistant
 
-From the full assignment folder, install its dependencies with `py -m pip install -r requirements.txt`. Copy `agent/.env.example` to `agent/.env` only if `.env` does not already exist. Add your Groq key and the hosted MCP settings shown above.
+The assignment project includes the `agent/` directory. Install the project dependencies from its root, then copy `agent/.env.example` to `agent/.env` if it does not already exist. Add your Groq API key and configure the MCP connection.
+
+```dotenv
+GROQ_API_KEY=your_groq_key
+MCP_URL=https://cgpa-mcp-server.onrender.com/mcp
+FASTMCP_KEY=
+```
+
+Use the local endpoint in `MCP_URL` when running against a local server. Keep the real `.env` file private.
 
 ```powershell
 cd agent
-py agent.py
+python agent.py
 ```
 
-Enter a name to select a `thread_id`. Commands are `/switch`, `/history`, `/forget`, and `exit`. The SQLite checkpointer preserves messages in `chats.db` in the working directory, so consistently run the client from `agent/`. SQLite may automatically create `chats.db-wal` and `chats.db-shm`.
+The terminal client streams model text and tool updates. It stores conversations in SQLite by chat name. Use `/switch` to change chats, `/history` to view a saved transcript, and `/forget` to delete the selected chat. When an interrupted run leaves a saved tool request without a result, recovery can record a matching error result so the conversation can continue.
 
-Streaming displays model text through `messages` and model/tool progress through `updates`. Recovery adds matching error ToolMessages for the supported case of an interrupted run ending with unanswered model tool calls.
-
-No local MCP server is needed when using Render. To test locally, run `server.py` in another terminal, change `MCP_URL` to the local endpoint, and restart the agent.
-
-## Optional GUI from the earlier assignment
-
-The full local assignment also includes `agent/app.py`, the optional Streamlit interface carried over from the earlier GPA assignment. Keep the Streamlit dependency when including this file. The server-only GitHub repository does not contain the GUI or agent files.
-
-The main Assignment 3 interface is the `agent.py` terminal client. Demonstrate streaming and the `/switch`, `/history`, and `/forget` commands through that terminal client. The optional GUI does not provide the same terminal commands or live streaming display.
-
-To launch the GUI from the full assignment folder:
-
-```powershell
-cd agent
-py -m streamlit run app.py
-```
-
-Open the local URL printed by Streamlit, usually `http://localhost:8501`. It uses the MCP URL configured in `agent/.env`; when that URL points to Render, no local MCP server is needed. The GUI should be tested separately before submission.
-
-## Render configuration
-
-- Runtime: Python
-- Build command: `pip install -r requirements.txt`
-- Start command: `python server.py`
-- Root directory: blank for this GitHub repository
-- Compute: Free
+For the optional browser interface, run `python -m streamlit run app.py` from `agent/`. Use the terminal client to demonstrate streaming and chat commands.
 
 ## Report storage
 
-`save_report` writes `.txt` reports into the server's `reports` directory and refuses to overwrite an existing filename. Reports are stored on the server, not downloaded to the client computer. Render's free filesystem is temporary, so reports may be lost after restarts or redeployments.
+`save_report` writes `.txt` files to the `reports/` directory beside the running server's `tools.py`. With a local server, that directory is inside `server/` in the assignment project. With the hosted endpoint, reports stay on Render's temporary filesystem and may be lost on restart or redeploy.
