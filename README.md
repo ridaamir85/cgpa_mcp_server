@@ -66,6 +66,21 @@ Streaming displays model text through `messages` and model/tool progress through
 
 No local MCP server is needed when using Render. To test locally, run `server.py` in another terminal, change `MCP_URL` to the local endpoint, and restart the agent.
 
+## Optional GUI from the earlier assignment
+
+The full local assignment also includes `agent/app.py`, the optional Streamlit interface carried over from the earlier GPA assignment. Keep the Streamlit dependency when including this file. The server-only GitHub repository does not contain the GUI or agent files.
+
+The main Assignment 3 interface is the `agent.py` terminal client. Demonstrate streaming and the `/switch`, `/history`, and `/forget` commands through that terminal client. The optional GUI does not provide the same terminal commands or live streaming display.
+
+To launch the GUI from the full assignment folder:
+
+```powershell
+cd agent
+py -m streamlit run app.py
+```
+
+Open the local URL printed by Streamlit, usually `http://localhost:8501`. It uses the MCP URL configured in `agent/.env`; when that URL points to Render, no local MCP server is needed. The GUI should be tested separately before submission.
+
 ## Render configuration
 
 - Runtime: Python
